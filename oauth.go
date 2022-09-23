@@ -27,15 +27,17 @@ type Permission string
 
 // Permissions defines the available permissions
 var Permissions = struct {
-	Public           Permission
-	ViewPrivate      Permission
-	Write            Permission
-	WriteViewPrivate Permission
+	Public            Permission
+	ViewPrivate       Permission
+	Write             Permission
+	WriteViewPrivate  Permission
+	ReadWriteActivity Permission
 }{
 	"public",
 	"view_private",
 	"write",
 	"write,view_private",
+	"read_all,activity:write",
 }
 
 // AuthorizationResponse is returned as a result of the token exchange
