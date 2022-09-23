@@ -46,6 +46,8 @@ type AuthorizationResponse struct {
 	RefreshToken string          `json:"refresh_token"`
 	State        string          `json:"State"`
 	Athlete      AthleteDetailed `json:"athlete"`
+	ExpiresAt    int             `json:"expires_at"`
+	ExpiresIn    int             `json:"expires_in"`
 }
 
 // CallbackPath returns the path portion of the CallbackURL.
