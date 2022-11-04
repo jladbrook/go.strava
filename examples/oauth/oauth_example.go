@@ -2,13 +2,14 @@
 // using the go.strava library.
 //
 // usage:
-//   > go get github.com/strava/go.strava
-//   > cd $GOPATH/github.com/strava/go.strava/examples
-//   > go run oauth_example.go -id=youappsid -secret=yourappsecret
 //
-//   Visit http://localhost:8080 in your webbrowser
+//	> go get github.com/strava/go.strava
+//	> cd $GOPATH/github.com/strava/go.strava/examples
+//	> go run oauth_example.go -id=youappsid -secret=yourappsecret
 //
-//   Application id and secret can be found at https://www.strava.com/settings/api
+//	Visit http://localhost:8080 in your webbrowser
+//
+//	Application id and secret can be found at https://www.strava.com/settings/api
 package main
 
 import (
@@ -71,8 +72,8 @@ func main() {
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// you should make this a template in your real application
-	fmt.Fprintf(w, `<a href="%s">`, authenticator.AuthorizationURL("state1", strava.Permissions.Public, true))
-	fmt.Fprint(w, `<img src="http://strava.github.io/api/images/ConnectWithStrava.png" />`)
+	fmt.Fprintf(w, `<a href="%s">`, authenticator.AuthorizationURL("state1", strava.ActivityReadAll, true))
+	fmt.Fprint(w, `Connect to Strava`)
 	fmt.Fprint(w, `</a>`)
 }
 

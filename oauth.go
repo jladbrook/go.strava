@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // An OAuthAuthenticator holds state about how OAuth requests should be authenticated.
@@ -23,21 +25,40 @@ type OAuthAuthenticator struct {
 
 // Permission represents the access of an access_token.
 // The permission type is requested during the token exchange.
-type Permission string
+type Permission uint8
 
 // Permissions defines the available permissions
-var Permissions = struct {
-	Public            Permission
-	ViewPrivate       Permission
-	Write             Permission
-	WriteViewPrivate  Permission
-	ReadWriteActivity Permission
-}{
-	"public",
-	"view_private",
-	"write",
-	"write,view_private",
-	"read_all,activity:write",
+const (
+	Read Permission = 1 << iota
+	ReadAll
+	ProfileReadAll
+	ProfileWrite
+	ActivityRead
+	ActivityReadAll
+	ActivityWrite
+)
+
+func (p Permission) permissionValues() []string {
+	return []string{
+		"read",
+		"read_all",
+		"profile:read_all",
+		"profile:write",
+		"activity:read",
+		"activity:read_all",
+		"activity:write",
+	}
+}
+
+func (p Permission) String() string {
+	var v []string
+	for i := Read; i <= ActivityWrite; i <<= 1 {
+		if p&i > 0 {
+			pow := int(math.Ceil(math.Log(float64(i&p)) / math.Log(2)))
+			v = append(v, p.permissionValues()[pow])
+		}
+	}
+	return strings.Join(v, ",")
 }
 
 // AuthorizationResponse is returned as a result of the token exchange
@@ -52,7 +73,8 @@ type AuthorizationResponse struct {
 
 // CallbackPath returns the path portion of the CallbackURL.
 // Useful when setting a http path handler, for example:
-//		http.HandleFunc(stravaOAuth.CallbackURL(), stravaOAuth.HandlerFunc(successCallback, failureCallback))
+//
+//	http.HandleFunc(stravaOAuth.CallbackURL(), stravaOAuth.HandlerFunc(successCallback, failureCallback))
 func (auth OAuthAuthenticator) CallbackPath() (string, error) {
 	if auth.CallbackURL == "" {
 		return "", errors.New("callbackURL is empty")
@@ -158,7 +180,7 @@ func (auth OAuthAuthenticator) HandlerFunc(
 
 // AuthorizationURL constructs the url a user should use to authorize this specific application.
 func (auth OAuthAuthenticator) AuthorizationURL(state string, scope Permission, force bool) string {
-	path := fmt.Sprintf("%s/oauth/authorize?client_id=%d&response_type=code&redirect_uri=%s&scope=%v", basePath, ClientId, auth.CallbackURL, scope)
+	path := fmt.Sprintf("%s/oauth/authorize?client_id=%d&response_type=code&redirect_uri=%s&scope=%v", basePath, ClientId, auth.CallbackURL, scope.String())
 
 	if state != "" {
 		path += "&state=" + state
